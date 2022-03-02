@@ -1,8 +1,13 @@
-import { storage, Context } from "near-sdk-core"
+import { storage, Context, PersistentUnorderedMap } from "near-sdk-core"
+import { ApplicantReference } from './models/ApplicantReference';
+import { ApplicantReferenceList } from "./models/ApplicantReferenceList";
+
 
 @nearBindgen
 export class Contract {
   private message: string = 'hello world'
+  private applicants: PersistentUnorderedMap<u32, ApplicantReferenceList> = new PersistentUnorderedMap<u32, ApplicantReferenceList>("applicants");
+
 
   // return the string 'hello world'
   helloWorld(): string {
@@ -18,20 +23,6 @@ export class Contract {
     }
   }
 
-  /**
-  write the given value at the given key to account (contract) storage
-  ---
-  note: this is what account storage will look like AFTER the write() method is called the first time
-  ╔════════════════════════════════╤══════════════════════════════════════════════════════════════════════════════════╗
-  ║                            key │ value                                                                            ║
-  ╟────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────╢
-  ║                          STATE │ {                                                                                ║
-  ║                                │   "message": "data was saved"                                                    ║
-  ║                                │ }                                                                                ║
-  ╟────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────╢
-  ║                       some-key │ some value                                                                       ║
-  ╚════════════════════════════════╧══════════════════════════════════════════════════════════════════════════════════╝
-   */
   @mutateState()
   write(key: string, value: string): string {
     storage.set(key, value)
@@ -39,6 +30,28 @@ export class Contract {
     return `✅ Data saved. ( ${this.storageReport()} )`
   }
 
+  @mutateState()
+  addReference(applicantId: u32,
+    contactName: string,
+    company: string,
+    comment: string): string {
+    
+    let applicantReferences =  this.applicants.get(applicantId);
+    if (applicantReferences == null) applicantReferences = new ApplicantReferenceList();
+    const referenceId = applicantReferences.addReference(applicantId, contactName, company, comment);
+    this.applicants.set(applicantId, applicantReferences);
+
+    return `✅ applicant reference saved. ( ${referenceId} )`;
+  }
+
+  getApplicantReferences(applicantId: u32): ApplicantReference[] {
+
+    assert(!this.applicants.contains(applicantId), `applicantId doesn't exists ${applicantId}`);
+    let applicantReferences = this.applicants.get(applicantId);
+    if (applicantReferences == null) applicantReferences = new ApplicantReferenceList();
+
+    return applicantReferences.getReferences();
+  }  
 
   // private helper method used by read() and write() above
   private storageReport(): string {
