@@ -5,19 +5,11 @@ import { ApplicantReferenceList } from "./models/ApplicantReferenceList";
 
 @nearBindgen
 export class Contract {
-  private message: string = 'hello world'
-  private applicants: PersistentUnorderedMap<u32, ApplicantReferenceList> = new PersistentUnorderedMap<u32, ApplicantReferenceList>("applicants");
-
-
-  // return the string 'hello world'
-  helloWorld(): string {
-    return this.message
-  }
-
+ 
   // read the given key from account (contract) storage
   read(key: string): string {
     if (isKeyInStorage(key)) {
-      return `✅ Key [ ${key} ] has value [ ${storage.getString(key)!} ] and "this.message" is [ ${this.message} ]`
+      return `✅ Key [ ${key} ] has value [ ${storage.getString(key)!} ]`
     } else {
       return `🚫 Key [ ${key} ] not found in storage. ( ${this.storageReport()} )`
     }
@@ -26,31 +18,22 @@ export class Contract {
   @mutateState()
   write(key: string, value: string): string {
     storage.set(key, value)
-    this.message = 'data was saved' // this is why we need the deorator @mutateState() above the method name
     return `✅ Data saved. ( ${this.storageReport()} )`
   }
 
   @mutateState()
-  addReference(applicantId: u32,
+  addReference(applicantId: string,
     contactName: string,
     company: string,
     comment: string): string {
-    
-    let applicantReferences =  this.applicants.get(applicantId);
-    if (applicantReferences == null) applicantReferences = new ApplicantReferenceList();
-    const referenceId = applicantReferences.addReference(applicantId, contactName, company, comment);
-    this.applicants.set(applicantId, applicantReferences);
-
+    let applicantList = new ApplicantReferenceList(applicantId);
+    const referenceId = applicantList.addReference(contactName, company, comment);
     return `✅ applicant reference saved. ( ${referenceId} )`;
   }
 
-  getApplicantReferences(applicantId: u32): ApplicantReference[] {
-
-    assert(!this.applicants.contains(applicantId), `applicantId doesn't exists ${applicantId}`);
-    let applicantReferences = this.applicants.get(applicantId);
-    if (applicantReferences == null) applicantReferences = new ApplicantReferenceList();
-
-    return applicantReferences.getReferences();
+  getApplicantReferences(applicantId: string): ApplicantReference[] {
+    let applicantList = new ApplicantReferenceList(applicantId);
+    return applicantList.getReferences();
   }  
 
   // private helper method used by read() and write() above

@@ -4,14 +4,14 @@ import { AccountId, Timestamp } from '../../../utils';
 @nearBindgen
 export class ApplicantReference {
 	id: u32;
-    applicantId: u32;
+    applicantId: string;
     date: Timestamp;
 	contactName: string;
     company: string;
     comment: string;
     signedBy: AccountId;
 	
-	constructor(applicantId: u32,
+	constructor(applicantId: string,
         contactName: string,
         company: string,
         comment: string) {

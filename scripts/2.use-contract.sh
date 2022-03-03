@@ -21,12 +21,10 @@ echo "(run this script again to see changes made by this file)"
 echo ---------------------------------------------------------
 echo
 
-near view $CONTRACT helloWorld
-
 echo
 echo
 
-near view $CONTRACT read '{"key":"some-key"}'
+#near view $CONTRACT read '{"key":"some-key"}'
 
 echo
 echo
@@ -37,9 +35,10 @@ echo
 
 # the following line fails with an error because we can't write to storage without signing the message
 # --> FunctionCallError(HostError(ProhibitedInView { method_name: "storage_write" }))
-near view $CONTRACT getApplicantReferences '{"applicantId": 123456789}'
+near view $CONTRACT getApplicantReferences '{"applicantId": "123456789"}'
+near view $CONTRACT getApplicantReferences '{"applicantId": "123456710"}'
 # near call $CONTRACT write '{"key": "some-key", "value":"some value"}' --accountId $CONTRACT
-# near call $CONTRACT addReference '{"applicantId": 123456789, "contactName":"Santiago M", "company":"Vago", "comment":"Vago.com"}' --accountId $CONTRACT
+# near call $CONTRACT addReference '{"applicantId": "123456710", "contactName":"Luis Jara", "company":"Garavito Inc", "comment":"Vago.com"}' --accountId $CONTRACT
 
 echo
 echo "now run this script again to see changes made by this file"
